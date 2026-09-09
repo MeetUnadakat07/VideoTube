@@ -1,4 +1,4 @@
-const asyncHandker = (requestHandler) => {
+const asyncHandler = (requestHandler) => {
     return (req, res, next) => {
         // check if the process gets resolved and if not then we will call the next middleware with error (indicate there was an error)
         Promise.resolve(requestHandler(req, res, next)).catch((err) =>
@@ -6,6 +6,8 @@ const asyncHandker = (requestHandler) => {
         );
     };
 };
+
+export { asyncHandler };
 
 // const asyncHandler = (fn) => {async () => {}}
 
