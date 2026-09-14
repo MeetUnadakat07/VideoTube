@@ -26,4 +26,35 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
-export { uploadOnCloudinary };
+const deleteFromCloudinary = async (imageURL) => {
+    try {
+        if (!imageURL) {
+            return null;
+        }
+
+        const parts = imageURL.split("/upload/");
+
+        if (parts.length !== 2) {
+            console.log("Invalid Cloudinary URL", imageURL);
+            return null;
+        }
+
+        let publicId = parts[1];
+
+        // regex for remove the version number if present
+        publicId = publicId.replace(/^v\d+\//, "");
+
+        // regex for removing the extension
+        publicId = publicId.replace(/\.[^/.]+$/, "");
+
+        const response = await cloudinary.uploader.destroy(publicId);
+
+        console.log("Cloudinary delete response: ", response);
+        return response;
+    } catch (error) {
+        console.log("Cloudinary delete error: ", error);
+        return null;
+    }
+};
+
+export { uploadOnCloudinary, deleteFromCloudinary };

@@ -1,7 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { APIError } from "../utils/apiError.js";
 import { User } from "../models/user.models.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+    uploadOnCloudinary,
+    deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 import { APIResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -274,7 +277,9 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
     return res
         .status(200)
-        .json(new APIResponse(200, req.user, "Current user fetched successfully"));
+        .json(
+            new APIResponse(200, req.user, "Current user fetched successfully")
+        );
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -309,9 +314,18 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         throw new APIError(400, "Avatar file is missing");
     }
 
+    // Get old avatar
+    const oldUser = await User.findById(req.user._id);
+
+    if (!oldUser) {
+        throw new APIError(404, "User not found");
+    }
+
+    const oldAvatar = oldUser.avatar;
+
     const avatar = await uploadOnCloudinary(avatarLocalPath);
 
-    if (!avatar.url) {
+    if (!avatar?.url) {
         throw new APIError(400, "Error while uploading Avatar");
     }
 
@@ -322,8 +336,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
                 avatar: avatar.url,
             },
         },
-        { new: true }.select("-password")
-    );
+        { new: true }
+    ).select("-password");
+
+    // Delete old avatar
+    if (oldAvatar) {
+        await deleteFromCloudinary(oldAvatar);
+    }
 
     return res
         .status(200)
@@ -337,9 +356,18 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new APIError(400, "Cover image file is missing");
     }
 
+    // Get old cover image
+    const oldUser = await User.findById(req.user._id);
+
+    if (!oldUser) {
+        throw new APIError(404, "User not found");
+    }
+
+    const oldCoverImage = oldUser.coverImage;
+
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-    if (!coverImage.url) {
+    if (!coverImage?.url) {
         throw new APIError(400, "Error while uploading cover image");
     }
 
@@ -350,8 +378,13 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
                 coverImage: coverImage.url,
             },
         },
-        { new: true }.select("-password")
-    );
+        { new: true }
+    ).select("-password");
+
+    // Delete old cover image
+    if (oldCoverImage) {
+        await deleteFromCloudinary(oldCoverImage);
+    }
 
     return res
         .status(200)
