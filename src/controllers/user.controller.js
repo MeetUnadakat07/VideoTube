@@ -12,6 +12,10 @@ import mongoose from "mongoose";
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId);
+        if (!user) {
+            throw new APIError(404, "User not found");
+        }
+
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
 
@@ -146,9 +150,9 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new APIError(404, "User does not exist");
     }
 
-    const isPAsswordValid = await user.isPasswordCorrect(password);
+    const isPasswordValid = await user.isPasswordCorrect(password);
 
-    if (!isPAsswordValid) {
+    if (!isPasswordValid) {
         throw new APIError(401, "Invalid user credentials");
     }
 
@@ -187,8 +191,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined,
+            $unset: {
+                refreshToken: 1, // this removes the field from document
             },
         },
         {
