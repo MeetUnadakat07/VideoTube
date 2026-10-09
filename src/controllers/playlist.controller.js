@@ -1,7 +1,7 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { Playlist } from "../models/playlist.model.js";
-import { ApiError } from "../utils/apiError.js";
-import { ApiResponse } from "../utils/apiResponse.js";
+import { Playlist } from "../models/playlist.models.js";
+import { APIError } from "../utils/apiError.js";
+import { APIResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const createPlaylist = asyncHandler(async (req, res) => {
@@ -11,7 +11,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     if (!name || !description) {
-        throw new ApiError(400, "Name and description are required");
+        throw new APIError(400, "Name and description are required");
     }
 
     const playlist = await Playlist.create({
@@ -21,12 +21,12 @@ const createPlaylist = asyncHandler(async (req, res) => {
     });
 
     if (!playlist) {
-        throw new ApiError(500, "Unable to create the playlist");
+        throw new APIError(500, "Unable to create the playlist");
     }
 
     return res
         .status(200)
-        .json(new ApiResponse(200, playlist, "Playlist created successfully"));
+        .json(new APIResponse(200, playlist, "Playlist created successfully"));
 });
 
 const getUserPlaylists = asyncHandler(async (req, res) => {
@@ -34,7 +34,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 
     const { userId } = req.params;
     if (!isValidObjectId(userId)) {
-        throw new ApiError(400, "Invalid user id");
+        throw new APIError(400, "Invalid user id");
     }
 
     const playlists = await Playlist.aggregate([
@@ -76,7 +76,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(
+            new APIResponse(
                 200,
                 playlists,
                 "User playlists fetched successfully"
@@ -90,7 +90,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
 
     if (!isValidObjectId(playlistId)) {
-        throw new ApiError(400, "Invalid playlist id");
+        throw new APIError(400, "Invalid playlist id");
     }
 
     const playlist = await Playlist.aggregate([
@@ -157,7 +157,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     ]);
 
     if (!playlist.length) {
-        throw new ApiError(404, "Playlist not found");
+        throw new APIError(404, "Playlist not found");
     }
 
     // console.log("Playlist from DB", playlist[0]);
@@ -166,7 +166,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(200, playlist[0], "Playlist fetched successfully")
+            new APIResponse(200, playlist[0], "Playlist fetched successfully")
         );
 });
 
@@ -175,21 +175,21 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     if (!isValidObjectId(userId)) {
-        throw new ApiError(400, "Invalid user id");
+        throw new APIError(400, "Invalid user id");
     }
 
     if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "Invalid video id");
+        throw new APIError(400, "Invalid video id");
     }
 
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-        throw new ApiError(404, "Playlist not found");
+        throw new APIError(404, "Playlist not found");
     }
 
     if (playlist.owner.toString() !== userId.toString()) {
-        throw new ApiError(
+        throw new APIError(
             403,
             "You are not authorized to add a video to this playlist"
         );
@@ -206,13 +206,13 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     );
 
     if (!updatedPlaylist) {
-        throw new ApiError(500, "Unable to add the video in the playlist");
+        throw new APIError(500, "Unable to add the video in the playlist");
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(
+            new APIResponse(
                 200,
                 updatedPlaylist,
                 "Video successfully added to the playlist"
@@ -227,21 +227,21 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     if (!isValidObjectId(userId)) {
-        throw new ApiError(400, "Invalid user id");
+        throw new APIError(400, "Invalid user id");
     }
 
     if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "Invalid video id");
+        throw new APIError(400, "Invalid video id");
     }
 
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-        throw new ApiError(404, "Playlist not found");
+        throw new APIError(404, "Playlist not found");
     }
 
     if (playlist.owner.toString() !== userId.toString()) {
-        throw new ApiError(
+        throw new APIError(
             403,
             "You are not authorized to remove a video from this playlist"
         );
@@ -258,13 +258,13 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     );
 
     if (!updatedPlaylist) {
-        throw new ApiError(500, "Unable to remove video from playlist");
+        throw new APIError(500, "Unable to remove video from playlist");
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(
+            new APIResponse(
                 200,
                 updatedPlaylist,
                 "Video successfully removed from the playlist"
@@ -279,21 +279,21 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     if (!isValidObjectId(userId)) {
-        throw new ApiError(400, "Invalid user id");
+        throw new APIError(400, "Invalid user id");
     }
 
     if (!isValidObjectId(playlistId)) {
-        throw new ApiError(400, "Invalid playlist id");
+        throw new APIError(400, "Invalid playlist id");
     }
 
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-        throw new ApiError(404, "Playlist not found");
+        throw new APIError(404, "Playlist not found");
     }
 
     if (playlist.owner.toString() !== userId.toString()) {
-        throw new ApiError(
+        throw new APIError(
             403,
             "You are not authorized to remove this playlist"
         );
@@ -302,13 +302,13 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     const deletedPlaylist = await Playlist.findByIdAndDelete(playlistId);
 
     if (!deletedPlaylist) {
-        throw new ApiError(500, "Unable to remove this playlist");
+        throw new APIError(500, "Unable to remove this playlist");
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(
+            new APIResponse(
                 200,
                 deletedPlaylist,
                 "The playlist is removed successfully"
@@ -324,15 +324,15 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     if (!isValidObjectId(userId)) {
-        throw new ApiError(400, "Invalid user id");
+        throw new APIError(400, "Invalid user id");
     }
 
     if (!isValidObjectId(playlistId)) {
-        throw new ApiError(400, "Invalid playlist id");
+        throw new APIError(400, "Invalid playlist id");
     }
 
     if (!name && !description) {
-        throw new ApiError(
+        throw new APIError(
             400,
             "Please provide the name or description to update"
         );
@@ -341,11 +341,11 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-        throw new ApiError(404, "Playlist not found");
+        throw new APIError(404, "Playlist not found");
     }
 
     if (playlist.owner.toString() !== userId.toString()) {
-        throw new ApiError(
+        throw new APIError(
             403,
             "You are not authorized to update this playlist"
         );
@@ -371,13 +371,13 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     );
 
     if (!updatedPlaylist) {
-        throw new ApiError(500, "Unable to update the playlist");
+        throw new APIError(500, "Unable to update the playlist");
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(
+            new APIResponse(
                 200,
                 updatedPlaylist,
                 "The playlist is updated successfully"

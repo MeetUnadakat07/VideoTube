@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { Video } from "../models/video.model.js";
-import { Subscription } from "../models/subscription.model.js";
-import { Like } from "../models/like.model.js";
-import { ApiError } from "../utils/apiError.js";
-import { ApiResponse } from "../utils/apiResponse.js";
+import { Video } from "../models/video.models.js";
+import { Subscription } from "../models/subscription.models.js";
+import { Like } from "../models/like.models.js";
+import { APIError } from "../utils/apiError.js";
+import { APIResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const getChannelStats = asyncHandler(async (req, res) => {
@@ -53,7 +53,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(
+            new APIResponse(
                 200,
                 channelStats,
                 "Channel stats fetched successfully"
@@ -68,7 +68,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
     if (!channelId) {
-        throw new ApiError(401, "Channel id not found. User not authenticated");
+        throw new APIError(401, "Channel id not found. User not authenticated");
     }
 
     const pageNumber = parseInt(page, 10);
@@ -114,7 +114,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(200, result, "Channel videos fetched successfully")
+            new APIResponse(200, result, "Channel videos fetched successfully")
         );
 });
 
