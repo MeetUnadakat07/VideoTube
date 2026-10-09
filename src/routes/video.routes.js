@@ -6,6 +6,7 @@ import {
     deleteVideo,
     getAllVideos,
     getVideoById,
+    publishAVideo,
     togglePublishStatus,
     updateVideo,
 } from "../controllers/video.controller.js";
@@ -21,7 +22,8 @@ router
         upload.fields([
             { name: "videoFile", maxCount: 1 },
             { name: "thumbnail", maxCount: 1 },
-        ])
+        ]),
+        publishAVideo
     );
 
 router

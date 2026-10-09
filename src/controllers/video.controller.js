@@ -153,7 +153,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         },
     });
 
-    const video = await video.aggregate([
+    const video = await Video.aggregate([
         {
             $match: {
                 _id: new mongoose.Types.ObjectId(videoId),
@@ -181,7 +181,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         {
             $addFields: {
                 owner: {
-                    $first: "owner",
+                    $arrayElemAt: ["$owner", 0],
                 },
             },
         },
@@ -233,7 +233,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         throw new APIError(405, "Video is missing");
     }
 
-    if (video.owner.tostring() !== req.user?._id.tostring()) {
+    if (video.owner.toString() !== req.user?._id.toString()) {
         throw new APIError(403, "You are not allowed to update this video");
     }
 
@@ -292,7 +292,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
         throw new APIError(404, "Video not found");
     }
 
-    if (video.owner.tostring() !== req.user?._id.tostring()) {
+    if (video.owner.toString() !== req.user?._id.toString()) {
         throw new APIError(401, "You are not allowed to delete this video");
     }
 
@@ -322,7 +322,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         throw new APIError(404, "Video not found");
     }
 
-    if (video.owner.tostring() !== req.user?._id.tostring()) {
+    if (video.owner.toString() !== req.user?._id.toString()) {
         throw new APIError(403, "You are not authorized to update this video");
     }
 
